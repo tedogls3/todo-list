@@ -1,55 +1,37 @@
 import { useState } from "react";
+import { useTodos } from "./todoContext";
 
 function TodoList() {
   const [newItem, setNewItem] = useState("");
-  const [items, setItems] = useState([]);
-  const [editingItemId, setEditingItemId] = useState(null);
+  const [editedId, setEditedId] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
 
-  function handleAddTodo(item) {
-    setItems((items) => [...items, item]);
-  }
+  const { items, addTodo, toggleTodo, saveEditedItem, deleteTodo } = useTodos();
 
-  function handleDeleteTodo(id) {
-    setItems((items) => items.filter((item) => item.id !== id));
-  }
+  const handleEditItem = (id, newTitle) => {
+    setEditedId(id);
+    setEditedTitle(newTitle);
+  };
 
-  function handleToggleItem(id) {
-    setItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    );
-  }
-
-  function handleEditItem(id, title) {
-    setEditingItemId(id);
-    setEditedTitle(title);
-  }
-
-  function handleSaveEditedItem(id) {
-    setItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, title: editedTitle } : item
-      )
-    );
-
-    setEditingItemId(null);
-    setEditedTitle("");
-  }
+  const handleSaveEditedItem = () => {
+    if (editedTitle.trim()) {
+      saveEditedItem(editedId, editedTitle);
+      setEditedId(null);
+      setEditedTitle("");
+    }
+  };
 
   function handleSubmit(e) {
     e.preventDefault();
 
-    const newTodo = {
+    const newObj = {
       id: Date.now(),
       title: newItem,
       completed: false,
     };
 
     if (!newItem) return;
-
-    handleAddTodo(newTodo);
+    addTodo(newObj);
     setNewItem("");
   }
 
@@ -72,10 +54,9 @@ function TodoList() {
             <input
               type="checkbox"
               checked={item.completed}
-              onChange={() => handleToggleItem(item.id)}
+              onChange={() => toggleTodo(item.id)}
             />
-
-            {editingItemId === item.id ? (
+            {editedId === item.id ? (
               <input
                 type="text"
                 value={editedTitle}
@@ -88,17 +69,16 @@ function TodoList() {
                 {item.title}
               </span>
             )}
-
-            {editingItemId === item.id ? (
+            {editedId === item.id ? (
               <button onClick={() => handleSaveEditedItem(item.id)}>
-                Save
+                save
               </button>
             ) : (
               <button onClick={() => handleEditItem(item.id, item.title)}>
                 Edit
               </button>
             )}
-            <button onClick={() => handleDeleteTodo(item.id)}>Delete</button>
+            <button onClick={() => deleteTodo(item.id)}>Delete</button>
           </li>
         ))}
       </ul>

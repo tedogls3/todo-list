@@ -1,9 +1,12 @@
 import TodoList from "./TodoList";
+import { TodosProvider } from "./todoContext";
 
 function App() {
   return (
     <div>
-      <TodoList />
+      <TodosProvider>
+        <TodoList />
+      </TodosProvider>
     </div>
   );
 }
